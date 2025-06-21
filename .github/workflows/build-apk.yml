@@ -78,8 +78,20 @@ jobs:
           exit 1
         fi
     
+    - name: Debug - Find APK files
+      run: |
+        echo "=== Searching for APK files ==="
+        find . -name "*.apk" -type f
+        echo "=== Build directory contents ==="
+        ls -la build/ || echo "No build directory"
+        ls -la build/app/ || echo "No build/app directory"
+        ls -la build/app/outputs/ || echo "No build/app/outputs directory"
+        ls -la build/app/outputs/flutter-apk/ || echo "No build/app/outputs/flutter-apk directory"
+    
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk 
+        path: |
+          build/app/outputs/flutter-apk/*.apk
+          build/app/outputs/apk/release/*.apk 
