@@ -69,9 +69,14 @@ jobs:
         ls -la $ANDROID_HOME/platforms/ || echo "No platforms directory"
         ls -la $ANDROID_HOME/build-tools/ || echo "No build-tools directory"
     
-    - name: Build APK with verbose output
+    - name: Clean build directory
       run: |
-        flutter build apk --release --verbose 2>&1 | tee build.log
+        flutter clean
+        rm -rf build/
+    
+    - name: Build APK with explicit target
+      run: |
+        flutter build apk --release --target=lib/main.dart --verbose 2>&1 | tee build.log
         if [ $? -ne 0 ]; then
           echo "=== Build failed, showing last 50 lines of log ==="
           tail -50 build.log
@@ -89,6 +94,13 @@ jobs:
         ls -la build/app/outputs/flutter-apk/ || echo "No build/app/outputs/flutter-apk directory"
         echo "=== Full build directory tree ==="
         find build/ -type f | head -50
+        echo "=== Checking if build was successful ==="
+        if [ -d "build/app/outputs/flutter-apk" ]; then
+          echo "Flutter APK directory exists"
+          ls -la build/app/outputs/flutter-apk/
+        else
+          echo "Flutter APK directory does not exist"
+        fi
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
