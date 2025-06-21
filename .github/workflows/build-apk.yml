@@ -22,8 +22,11 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.0'
+        flutter-version: '3.19.0'
         channel: 'stable'
+    
+    - name: Debug - Check Flutter version
+      run: flutter --version
     
     - name: Get dependencies
       run: flutter pub get
@@ -42,12 +45,38 @@ jobs:
         echo "distributionPath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
         echo "zipStoreBase=GRADLE_USER_HOME" >> android/gradle/wrapper/gradle-wrapper.properties
         echo "zipStorePath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
-        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip" >> android/gradle/wrapper/gradle-wrapper.properties
-        curl -L -o android/gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v7.5.0/gradle/wrapper/gradle-wrapper.jar
+        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-all.zip" >> android/gradle/wrapper/gradle-wrapper.properties
+        curl -L -o android/gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v7.6.1/gradle/wrapper/gradle-wrapper.jar
         chmod +x android/gradlew
     
-    - name: Build APK
-      run: flutter build apk --release
+    - name: Debug - Check Android project structure
+      run: |
+        echo "=== Android Project Structure ==="
+        find android -type f -name "*.gradle" -o -name "*.properties" -o -name "*.xml" | head -20
+        echo "=== Gradle Wrapper Files ==="
+        ls -la android/gradle/wrapper/
+        echo "=== Local Properties ==="
+        cat android/local.properties
+    
+    - name: Debug - Check Flutter doctor
+      run: flutter doctor -v
+    
+    - name: Debug - Check Android SDK
+      run: |
+        echo "=== Android SDK Location ==="
+        echo $ANDROID_HOME
+        echo "=== Android SDK Contents ==="
+        ls -la $ANDROID_HOME/platforms/ || echo "No platforms directory"
+        ls -la $ANDROID_HOME/build-tools/ || echo "No build-tools directory"
+    
+    - name: Build APK with verbose output
+      run: |
+        flutter build apk --release --verbose 2>&1 | tee build.log
+        if [ $? -ne 0 ]; then
+          echo "=== Build failed, showing last 50 lines of log ==="
+          tail -50 build.log
+          exit 1
+        fi
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
