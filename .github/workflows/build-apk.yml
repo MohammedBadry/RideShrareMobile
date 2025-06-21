@@ -35,6 +35,14 @@ jobs:
         echo "flutter.versionName=1.0.0" >> android/local.properties
         echo "flutter.versionCode=1" >> android/local.properties
     
+    - name: Download gradle-wrapper.jar
+      run: |
+        mkdir -p android/gradle/wrapper
+        curl -L -o android/gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v7.5.0/gradle/wrapper/gradle-wrapper.jar
+    
+    - name: Make gradlew executable
+      run: chmod +x android/gradlew
+    
     - name: Build APK
       run: flutter build apk --release
     
