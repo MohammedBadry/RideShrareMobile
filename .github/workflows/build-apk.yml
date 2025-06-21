@@ -35,13 +35,16 @@ jobs:
         echo "flutter.versionName=1.0.0" >> android/local.properties
         echo "flutter.versionCode=1" >> android/local.properties
     
-    - name: Download gradle-wrapper.jar
+    - name: Setup Gradle Wrapper
       run: |
         mkdir -p android/gradle/wrapper
+        echo "distributionBase=GRADLE_USER_HOME" > android/gradle/wrapper/gradle-wrapper.properties
+        echo "distributionPath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
+        echo "zipStoreBase=GRADLE_USER_HOME" >> android/gradle/wrapper/gradle-wrapper.properties
+        echo "zipStorePath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
+        echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip" >> android/gradle/wrapper/gradle-wrapper.properties
         curl -L -o android/gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v7.5.0/gradle/wrapper/gradle-wrapper.jar
-    
-    - name: Make gradlew executable
-      run: chmod +x android/gradlew
+        chmod +x android/gradlew
     
     - name: Build APK
       run: flutter build apk --release
